@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Управление компаниями{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2>Управление компаниями</h2>
+        <a href="{{ url_for('security_dashboard') }}" class="btn btn-primary">
+            Панель безопасности
+        </a>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #dbe2ef; color: #112d4e;">
+                    <th style="padding: 15px; text-align: left;">Название</th>
+                    <th style="padding: 15px; text-align: left;">ИНН</th>
+                    <th style="padding: 15px; text-align: left;">Статус</th>
+                    <th style="padding: 15px; text-align: left;">Директор</th>
+                    <th style="padding: 15px; text-align: left;">Дата регистрации</th>
+                    <th style="padding: 15px; text-align: left;">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for company in companies %}
+                <tr style="border-bottom: 1px solid #dbe2ef;">
+                    <td style="padding: 15px;">
+                        <strong>{{ company.name }}</strong>
+                    </td>
+                    <td style="padding: 15px;">{{ company.inn }}</td>
+                    <td style="padding: 15px;">
+                        <span style="
+                            display: inline-block;
+                            padding: 4px 12px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            {% if company.status == 'approved' %}
+                                background: #a8d5ba; color: #112d4e;
+                            {% elif company.status == 'pending' %}
+                                background: #f5e6ad; color: #112d4e;
+                            {% else %}
+                                background: #f1a7b1; color: white;
+                            {% endif %}
+                        ">
+                            {% if company.status == 'approved' %}
+                                Подтверждена
+                            {% elif company.status == 'pending' %}
+                                На рассмотрении
+                            {% else %}
+                                Отклонена
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">
+                        {% if company.director %}
+                            {{ company.director.full_name }}
+                        {% else %}
+                            Не назначен
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px;">
+                        {{ company.created_at.strftime('%d.%m.%Y') }}
+                    </td>
+                    <td style="padding: 15px;">
+                        <div style="display: flex; gap: 8px;">
+                            {% if company.status == 'pending' %}
+                            <a href="{{ url_for('approve_company', company_id=company.id) }}" 
+                               class="btn btn-success" style="padding: 6px 12px; font-size: 12px;">
+                                Подтвердить
+                            </a>
+                            {% endif %}
+                            <a href="#" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                                Просмотр
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 30px; background: #f9f7f7; padding: 20px; border-radius: 10px;">
+        <h3 style="color: #3f72af; margin-bottom: 15px;">Статистика компаний</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+            <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #112d4e;">
+                    {{ companies|length }}
+                </div>
+                <div style="color: #3f72af; font-size: 14px;">
+                    Всего компаний
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #112d4e;">
+                    {{ companies|selectattr('status', 'equalto', 'approved')|list|length }}
+                </div>
+                <div style="color: #3f72af; font-size: 14px;">
+                    Подтвержденных
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 36px; font-weight: bold; color: #112d4e;">
+                    {{ companies|selectattr('status', 'equalto', 'pending')|list|length }}
+                </div>
+                <div style="color: #3f72af; font-size: 14px;">
+                    На рассмотрении
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

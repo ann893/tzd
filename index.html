@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Добро пожаловать в ЗЭДКД!</h1>
+    <p>Система защищенного электронного документооборота для конфиденциальных документов</p>
+    
+    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <div style="background: #dbe2ef; padding: 20px; border-radius: 10px;">
+            <h3>🛡️ Защита документов</h3>
+            <p>Криптографическая защита по ГОСТ стандартам</p>
+        </div>
+        
+        <div style="background: #c7d3e6; padding: 20px; border-radius: 10px;">
+            <h3>📄 Типы документов</h3>
+            <p>Служебная записка, приказ, сопроводительное письмо</p>
+        </div>
+        
+        <div style="background: #a8c6e0; padding: 20px; border-radius: 10px; color: white;">
+            <h3>🔐 Безопасность</h3>
+            <p>RBAC с 10 ролями, журнал аудита, ЭЦП</p>
+        </div>
+    </div>
+    
+    {% if not current_user.is_authenticated %}
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{{ url_for('login') }}" class="btn btn-primary" style="padding: 15px 30px; font-size: 16px;">
+            Войти в систему
+        </a>
+        <p style="margin-top: 15px; color: #3f72af;">
+            Нет доступа? <a href="{{ url_for('register_company') }}">Зарегистрируйте компанию</a>
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+{% if current_user.is_authenticated %}
+<div class="card">
+    <h2>Быстрые действия</h2>
+    <div style="display: flex; gap: 15px; margin-top: 20px;">
+        <a href="{{ url_for('create_document') }}" class="btn btn-primary">
+            Создать новый документ
+        </a>
+        <a href="{{ url_for('documents_list') }}" class="btn btn-secondary">
+            Просмотреть мои документы
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

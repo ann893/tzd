@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="text-align: center; margin-bottom: 30px;">Вход в ЗЭДКД</h2>
+        
+        <form method="POST">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #3f72af;">Email</label>
+                <input type="email" name="email" required 
+                       style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;"
+                       placeholder="Введите email">
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; color: #3f72af;">Пароль</label>
+                <input type="password" name="password" required
+                       style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;"
+                       placeholder="Введите пароль">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Войти в систему
+            </button>
+        </form>
+        
+        <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #dbe2ef;">
+            <p style="color: #3f72af; text-align: center;">
+                Нет учетной записи?<br>
+                <a href="{{ url_for('register_company') }}">Зарегистрируйте компанию</a>
+            </p>
+            
+            <div style="background: #f9f7f7; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <p style="font-size: 14px; color: #3f72af; margin: 0;">
+                    <strong>Тестовый доступ:</strong><br>
+                    Email: admin@zedkd.ru<br>
+                    Пароль: admin123
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

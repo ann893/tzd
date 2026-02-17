@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Создание документа{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Создание нового документа</h2>
+    
+    <form method="POST" enctype="multipart/form-data" style="margin-top: 25px;">
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #3f72af;">Тип документа</label>
+            <select name="doc_type" required 
+                    style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;">
+                <option value="">Выберите тип документа</option>
+                <option value="service_note">Служебная записка (3 этапа)</option>
+                <option value="order">Приказ (5 этапов)</option>
+                <option value="cover_letter">Сопроводительное письмо (8 этапов)</option>
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #3f72af;">Название документа</label>
+            <input type="text" name="title" required
+                   style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;"
+                   placeholder="Введите название документа">
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; color: #3f72af;">Файл документа</label>
+            <input type="file" name="file" required
+                   style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;">
+            <small style="color: #3f72af; font-size: 14px;">Поддерживаемые форматы: PDF, DOC, DOCX, TXT</small>
+        </div>
+        
+        <div style="display: flex; gap: 15px;">
+            <button type="submit" class="btn btn-primary">
+                Создать документ
+            </button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                Отмена
+            </a>
+        </div>
+    </form>
+    
+    <div style="margin-top: 30px; background: #f9f7f7; padding: 20px; border-radius: 10px;">
+        <h3 style="color: #3f72af; margin-bottom: 15px;">Описание типов документов:</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div>
+                <h4>Служебная записка</h4>
+                <p style="font-size: 14px;">3 этапа:<br>1. Согласование<br>2. Визирование<br>3. Исполнение</p>
+            </div>
+            <div>
+                <h4>Приказ</h4>
+                <p style="font-size: 14px;">5 этапов:<br>1. Регистрация<br>2. Согласование<br>3. Экспертиза<br>4. Утверждение<br>5. Отправка</p>
+            </div>
+            <div>
+                <h4>Сопроводительное письмо</h4>
+                <p style="font-size: 14px;">8 этапов:<br>Включает шифрование и отправку по адресам</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Назначение ответственного</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5>Документ: {{ document.title }}</h5>
+            <p>Этап {{ stage.stage_number }}: {{ stage.title }}</p>
+            <p>Требуемая роль: {{ stage.role_required }}</p>
+            
+            <form method="POST" action="{{ url_for('assign_stage', doc_id=document.id, stage_number=stage.stage_number) }}">
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">Выберите пользователя:</label>
+                    <select class="form-select" id="user_id" name="user_id" required>
+                        <option value="">Выберите пользователя...</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if user.id == stage.assigned_to %}selected{% endif %}>
+                            {{ user.full_name }} ({{ user.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Назначить</button>
+                <a href="{{ url_for('document_view', doc_id=document.id) }}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

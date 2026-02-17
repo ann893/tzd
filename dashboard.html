@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>Добро пожаловать, {{ current_user.full_name }}!</h2>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Статистика</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card text-white bg-primary mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ my_documents|length }}</h5>
+                                <p class="card-text">Мои документы</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-success mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ assigned_stages|length }}</h5>
+                                <p class="card-text">Заданий для меня</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-white bg-info mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ documents|length }}</h5>
+                                <p class="card-text">Всего документов</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if assigned_stages %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Требуются мои действия</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Документ</th>
+                            <th>Этап</th>
+                            <th>Действие</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stage in assigned_stages %}
+                        <tr>
+                            <td>{{ stage.document_ref.title }}</td>
+                            <td>Этап {{ stage.stage_number }}: {{ stage.action }}</td>
+                            <td>{{ stage.role_required }}</td>
+                            <td>
+                                <a href="{{ url_for('document_view', doc_id=stage.document_id) }}" class="btn btn-sm btn-primary">Обработать</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Последние документы</h5>
+            </div>
+            <div class="card-body">
+                {% if documents %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td>{{ doc.title }}</td>
+                            <td>
+                                {% if doc.type == 'service_note' %}Служебная записка
+                                {% elif doc.type == 'order' %}Приказ
+                                {% elif doc.type == 'cover_letter' %}Сопроводительное письмо
+                                {% else %}{{ doc.type }}{% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if doc.status == 'draft' %}bg-secondary
+                                    {% elif doc.status == 'in_progress' %}bg-warning
+                                    {% elif doc.status == 'completed' %}bg-success
+                                    {% elif doc.status == 'approved' %}bg-info
+                                    {% elif doc.status == 'signed' %}bg-primary
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ doc.status }}
+                                </span>
+                            </td>
+                            <td>{{ doc.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('document_view', doc_id=doc.id) }}" class="btn btn-sm btn-outline-primary">Просмотр</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>Нет документов</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Быстрые действия</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('create_document') }}" class="btn btn-primary">Создать документ</a>
+                    <a href="{{ url_for('my_documents') }}" class="btn btn-outline-primary">Мои документы</a>
+                    <a href="{{ url_for('assigned_documents') }}" class="btn btn-outline-warning">Назначенные мне</a>
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('security_dashboard') }}" class="btn btn-outline-danger">Безопасность</a>
+                    <a href="{{ url_for('audit_log') }}" class="btn btn-outline-secondary">Журнал аудита</a>
+                    {% endif %}
+                </div>
+                
+                <hr>
+                
+                <h6>Ваши права:</h6>
+                <ul class="list-group list-group-flush">
+                    {% if current_user.role == 'admin' %}
+                    <li class="list-group-item">✅ Полный доступ ко всему</li>
+                    <li class="list-group-item">✅ Управление компаниями</li>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.role, 'can_create_document') %}
+                    <li class="list-group-item">✅ Создание документов</li>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.role, 'can_sign_document') %}
+                    <li class="list-group-item">✅ Подписание документов</li>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.role, 'can_encrypt_document') %}
+                    <li class="list-group-item">✅ Шифрование документов</li>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.role, 'can_approve_document') %}
+                    <li class="list-group-item">✅ Утверждение документов</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

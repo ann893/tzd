@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Панель безопасности{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2>Панель безопасности</h2>
+        <a href="{{ url_for('audit_log') }}" class="btn btn-secondary">
+            Журнал аудита
+        </a>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <div style="background: linear-gradient(135deg, #dbe2ef, #c7d3e6); padding: 25px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 36px; font-weight: bold; color: #112d4e; margin-bottom: 10px;">
+                {{ users_with_keys }}
+            </div>
+            <div style="color: #3f72af; font-size: 14px;">
+                Пользователей с ключами
+            </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #a8c6e0, #8bb4d8); padding: 25px; border-radius: 15px; text-align: center; color: white;">
+            <div style="font-size: 36px; font-weight: bold; margin-bottom: 10px;">
+                {{ documents_signed }}
+            </div>
+            <div style="font-size: 14px;">
+                Документов подписано
+            </div>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #a8d5ba, #8dc5a8); padding: 25px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 36px; font-weight: bold; color: #112d4e; margin-bottom: 10px;">
+                {{ encrypted_docs }}
+            </div>
+            <div style="color: #3f72af; font-size: 14px;">
+                Документов зашифровано
+            </div>
+        </div>
+    </div>
+    
+    <h3 style="color: #3f72af; margin-bottom: 20px;">Криптографические модули</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <div style="border: 1px solid #dbe2ef; border-radius: 10px; padding: 20px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">🛡️ ЭЦП (ГОСТ 34.10-2018)</h4>
+            <p style="color: #3f72af; font-size: 14px; margin-bottom: 15px;">
+                Электронная цифровая подпись для аутентификации и защиты целостности документов.
+            </p>
+            <div style="font-size: 12px; color: #666; background: #f9f7f7; padding: 10px; border-radius: 5px;">
+                Модуль: gost_ecp.py
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #dbe2ef; border-radius: 10px; padding: 20px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">🔐 Шифрование (Кузнечик-MGM)</h4>
+            <p style="color: #3f72af; font-size: 14px; margin-bottom: 15px;">
+                Блочное шифрование в режиме MGM с аутентификацией. ГОСТ 34.12-2015, 34.13-2018.
+            </p>
+            <div style="font-size: 12px; color: #666; background: #f9f7f7; padding: 10px; border-radius: 5px;">
+                Модуль: kuznechik_mgm.py
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #dbe2ef; border-radius: 10px; padding: 20px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">🗜️ Шифрование (Магма)</h4>
+            <p style="color: #3f72af; font-size: 14px; margin-bottom: 15px;">
+                Отечественный блочный шифр. ГОСТ 34.12-2015. Ключ 256 бит, блок 64 бита.
+            </p>
+            <div style="font-size: 12px; color: #666; background: #f9f7f7; padding: 10px; border-radius: 5px;">
+                Модуль: magma.py
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #dbe2ef; border-radius: 10px; padding: 20px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">🔑 Генерация ключей</h4>
+            <p style="color: #3f72af; font-size: 14px; margin-bottom: 15px;">
+                Генерация и диверсификация ключевого материала по ГОСТ Р 34.10-2012.
+            </p>
+            <div style="font-size: 12px; color: #666; background: #f9f7f7; padding: 10px; border-radius: 5px;">
+                Модуль: key_generator.py
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #dbe2ef; border-radius: 10px; padding: 20px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">📊 Хэширование (Стрибог)</h4>
+            <p style="color: #3f72af; font-size: 14px; margin-bottom: 15px;">
+                Хэш-функция ГОСТ 34.11-2018. Поддержка 256 и 512 битных хэшей.
+            </p>
+            <div style="font-size: 12px; color: #666; background: #f9f7f7; padding: 10px; border-radius: 5px;">
+                Модуль: stribog_hash.py
+            </div>
+        </div>
+        
+        <div style="border: 1px solid #dbe2ef; border-radius: 10px; padding: 20px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">🤝 Обмен ключами</h4>
+            <p style="color: #3f72af; font-size: 14px; margin-bottom: 15px;">
+                Диффи-Хеллман и Эль-Гамаль для безопасного обмена ключами и подписи.
+            </p>
+            <div style="font-size: 12px; color: #666; background: #f9f7f7; padding: 10px; border-radius: 5px;">
+                Модуль: diffie_elgamal.py
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 40px; padding: 20px; background: #f9f7f7; border-radius: 10px;">
+        <h3 style="color: #3f72af; margin-bottom: 15px;">Статус системы</h3>
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #a8d5ba;"></div>
+            <span>Криптографические модули: Работают</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #a8d5ba;"></div>
+            <span>База данных: Активна</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #a8d5ba;"></div>
+            <span>Журнал аудита: Ведется</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+<!-- templates/document_view.html -->
+{% extends "base.html" %}
+
+{% block title %}Документ: {{ document.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>{{ document.title }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Тип:</strong>
+                            {% if document.type == 'service_note' %}Служебная записка
+                            {% elif document.type == 'order' %}Приказ
+                            {% elif document.type == 'cover_letter' %}Сопроводительное письмо
+                            {% else %}{{ document.type }}{% endif %}
+                        </p>
+                        <p><strong>Статус:</strong>
+                            <span class="badge 
+                                {% if document.status == 'draft' %}bg-secondary
+                                {% elif document.status == 'in_progress' %}bg-warning
+                                {% elif document.status == 'completed' %}bg-success
+                                {% elif document.status == 'approved' %}bg-info
+                                {% elif document.status == 'signed' %}bg-primary
+                                {% else %}bg-secondary{% endif %}">
+                                {{ document.status }}
+                            </span>
+                        </p>
+                        <p><strong>Автор:</strong> {{ document.author.full_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Создан:</strong> {{ document.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                        <p><strong>UUID:</strong> {{ document.uuid }}</p>
+                        <p><strong>Хэш:</strong> <small>{{ document.original_hash[:20] }}...</small></p>
+                    </div>
+                </div>
+
+                <!-- КНОПКИ ДЛЯ ИСПОЛНИТЕЛЯ -->
+                {% if current_stage and current_stage.role_required == 'executor' and current_stage.action == 'encrypt' %}
+                    <div class="alert alert-warning">
+                        <h5>Требуется ваше действие!</h5>
+                        <p>Этап {{ current_stage.stage_number }}: {{ current_stage.title }}</p>
+                        <form method="POST" action="{{ url_for('process_document', doc_id=document.id) }}">
+                            <input type="hidden" name="action" value="encrypt">
+                            <div class="mb-3">
+                                <label for="comments" class="form-label">Комментарий:</label>
+                                <textarea class="form-control" id="comments" name="comments" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">ЗАШИФРОВАТЬ ДОКУМЕНТ</button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <!-- КНОПКИ ДЛЯ ДРУГИХ ДЕЙСТВИЙ -->
+                {% if current_stage and current_stage.assigned_to == current_user.id %}
+                    <div class="alert alert-info">
+                        <h5>Требуется ваше действие:</h5>
+                        <form method="POST" action="{{ url_for('process_document', doc_id=document.id) }}">
+                            <input type="hidden" name="action" value="{{ current_stage.action }}">
+                            <div class="mb-3">
+                                <label for="comments" class="form-label">Комментарий:</label>
+                                <textarea class="form-control" id="comments" name="comments" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                {% if current_stage.action == 'review' %}ПРОВЕРИТЬ
+                                {% elif current_stage.action == 'approve' %}УТВЕРДИТЬ
+                                {% elif current_stage.action == 'register' %}ЗАРЕГИСТРИРОВАТЬ
+                                {% elif current_stage.action == 'send' %}ОТПРАВИТЬ
+                                {% elif current_stage.action == 'encrypt' %}ЗАШИФРОВАТЬ
+                                {% else %}ВЫПОЛНИТЬ{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <!-- СКАЧИВАНИЕ -->
+                <div class="mb-3">
+                    <a href="{{ url_for('download_document', doc_id=document.id) }}" class="btn btn-success">
+                        📥 Скачать документ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- МАРШРУТ ДОКУМЕНТА -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Маршрут документа</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for stage in route_config %}
+                        <div class="timeline-item {% if stage.stage == document.current_stage %}current{% elif stage.stage < document.current_stage %}completed{% endif %}">
+                            <div class="timeline-marker">
+                                {% if stage.stage == document.current_stage %}🟢
+                                {% elif stage.stage < document.current_stage %}✅
+                                {% else %}⭕{% endif %}
+                            </div>
+                            <div class="timeline-content">
+                                <h6>Этап {{ stage.stage }}: {{ stage.title }}</h6>
+                                <p>
+                                    <strong>Роль:</strong> {{ stage.role }}<br>
+                                    <strong>Действие:</strong> {{ stage.action }}<br>
+                                    <strong>Ответственный:</strong> {{ stage.assigned_name }}
+                                </p>
+                                {% if stage.stage == document.current_stage and stage.role == current_user.role %}
+                                    <form method="POST" action="{{ url_for('process_document', doc_id=document.id) }}" style="display:inline;">
+                                        <input type="hidden" name="action" value="{{ stage.action }}">
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            Выполнить {{ stage.action }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- ЭТАПЫ -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Этапы обработки</h5>
+            </div>
+            <div class="card-body">
+                {% for stage in stages %}
+                    <div class="mb-3 p-2 border rounded {% if stage.status == 'completed' %}bg-light{% elif stage.stage_number == document.current_stage %}bg-warning{% endif %}">
+                        <h6>Этап {{ stage.stage_number }}: {{ stage.action|title }}</h6>
+                        <p>
+                            <strong>Роль:</strong> {{ stage.role_required }}<br>
+                            <strong>Статус:</strong> 
+                            <span class="badge {% if stage.status == 'completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ stage.status }}
+                            </span><br>
+                            <strong>Назначен:</strong> {% if stage.assigned_user %}{{ stage.assigned_user.full_name }}{% else %}Не назначен{% endif %}
+                        </p>
+                        
+                        <!-- КНОПКА ДЛЯ EXECUTOR ДАЖЕ ЕСЛИ НЕ НАЗНАЧЕН -->
+                        {% if stage.role_required == 'executor' and stage.action == 'encrypt' and stage.status == 'pending' %}
+                            {% if current_user.role == 'executor' %}
+                                <form method="POST" action="{{ url_for('process_document', doc_id=document.id) }}">
+                                    <input type="hidden" name="action" value="encrypt">
+                                    <div class="mb-2">
+                                        <textarea class="form-control form-control-sm" name="comments" placeholder="Комментарий" rows="2"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary">Я EXECUTOR - ЗАШИФРОВАТЬ</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- БЫСТРЫЕ ДЕЙСТВИЯ -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Быстрые действия</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if has_permission(current_user.role, 'can_sign_document') %}
+                        <a href="{{ url_for('sign_document', doc_id=document.id) }}" class="btn btn-outline-primary">Подписать документ</a>
+                    {% endif %}
+                    
+                    <!-- ОСОБАЯ КНОПКА ДЛЯ EXECUTOR -->
+                    {% if document.type == 'service_note' and document.current_stage == 2 %}
+                        {% if current_user.role == 'executor' %}
+                            <form method="POST" action="{{ url_for('process_document', doc_id=document.id) }}">
+                                <input type="hidden" name="action" value="encrypt">
+                                <button type="submit" class="btn btn-warning">🚨 EXECUTOR: ЗАШИФРОВАТЬ СЕЙЧАС</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <a href="{{ url_for('download_document', doc_id=document.id) }}" class="btn btn-success">Скачать</a>
+                    <a href="{{ url_for('documents_list') }}" class="btn btn-secondary">К списку документов</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+.timeline-item.completed {
+    opacity: 0.7;
+}
+.timeline-item.current {
+    background-color: #fff3cd;
+    padding: 10px;
+    border-radius: 5px;
+}
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    font-size: 20px;
+}
+.timeline-content {
+    margin-left: 10px;
+}
+</style>
+{% endblock %}

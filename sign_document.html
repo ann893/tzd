@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Подписание документа{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="text-align: center; margin-bottom: 30px;">Подписание документа</h2>
+        
+        <div style="background: #f9f7f7; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+            <h4 style="color: #112d4e; margin-bottom: 10px;">{{ document.title }}</h4>
+            <p style="color: #3f72af; margin: 5px 0;">
+                <strong>Тип:</strong> 
+                {% if document.type == 'service_note' %}
+                    Служебная записка
+                {% elif document.type == 'order' %}
+                    Приказ
+                {% elif document.type == 'cover_letter' %}
+                    Сопроводительное письмо
+                {% else %}
+                    {{ document.type }}
+                {% endif %}
+            </p>
+            <p style="color: #3f72af; margin: 5px 0;">
+                <strong>Хэш документа:</strong> {{ document.original_hash[:32] }}...
+            </p>
+            <p style="color: #3f72af; margin: 5px 0;">
+                <strong>Создан:</strong> {{ document.created_at.strftime('%d.%m.%Y %H:%M') }}
+            </p>
+        </div>
+        
+        <div style="background: #dbe2ef; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">📋 Информация о подписи</h4>
+            <p style="color: #3f72af; margin-bottom: 10px;">
+                <strong>Алгоритм:</strong> ГОСТ 34.10-2018 (ЭЦП)
+            </p>
+            <p style="color: #3f72af; margin-bottom: 10px;">
+                <strong>Хэш-функция:</strong> Стрибог-256
+            </p>
+            <p style="color: #3f72af;">
+                <strong>Подписывающий:</strong> {{ current_user.full_name }} ({{ current_user.role }})
+            </p>
+        </div>
+        
+        <form method="POST">
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; color: #3f72af;">
+                    Комментарий к подписи (опционально)
+                </label>
+                <textarea name="comment" rows="3"
+                          style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;"
+                          placeholder="Введите комментарий..."></textarea>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Подписать документ
+                </button>
+                <a href="{{ url_for('document_view', doc_id=document.id) }}" class="btn btn-secondary" style="width: 100%;">
+                    Отменить
+                </a>
+            </div>
+        </form>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dbe2ef;">
+            <h4 style="color: #3f72af; margin-bottom: 15px;">ℹ️ Важная информация</h4>
+            <ul style="color: #3f72af; padding-left: 20px;">
+                <li>Подпись создается с использованием вашего приватного ключа</li>
+                <li>После подписания документ нельзя изменить без нарушения подписи</li>
+                <li>Подпись обеспечивает аутентификацию и целостность документа</li>
+                <li>Время подписания фиксируется в журнале аудита</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

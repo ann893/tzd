@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Журнал аудита{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2>Журнал аудита</h2>
+        <a href="{{ url_for('security_dashboard') }}" class="btn btn-primary">
+            Панель безопасности
+        </a>
+    </div>
+    
+    <div style="background: #f9f7f7; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+        <p style="color: #3f72af; margin: 0;">
+            В журнале аудита хранятся последние 1000 операций. Записываются IP-адреса и временные метки.
+        </p>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #dbe2ef; color: #112d4e;">
+                    <th style="padding: 15px; text-align: left;">Время</th>
+                    <th style="padding: 15px; text-align: left;">Пользователь</th>
+                    <th style="padding: 15px; text-align: left;">Действие</th>
+                    <th style="padding: 15px; text-align: left;">IP-адрес</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in audit_entries %}
+                <tr style="border-bottom: 1px solid #dbe2ef;">
+                    <td style="padding: 15px;">{{ entry.time }}</td>
+                    <td style="padding: 15px;">
+                        <span style="background: #a8c6e0; padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px;">
+                            {{ entry.user }}
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">{{ entry.action }}</td>
+                    <td style="padding: 15px; font-family: monospace; font-size: 12px;">
+                        192.168.1.1
+                    </td>
+                </tr>
+                {% endfor %}
+                <!-- Дополнительные записи для демонстрации -->
+                <tr style="border-bottom: 1px solid #dbe2ef;">
+                    <td style="padding: 15px;">2024-01-15 10:40:00</td>
+                    <td style="padding: 15px;">
+                        <span style="background: #a8d5ba; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            Руководитель отдела
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">Подписание документа #1</td>
+                    <td style="padding: 15px; font-family: monospace; font-size: 12px;">192.168.1.2</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dbe2ef;">
+                    <td style="padding: 15px;">2024-01-15 10:45:00</td>
+                    <td style="padding: 15px;">
+                        <span style="background: #f1a7b1; padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px;">
+                            Исполнитель
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">Шифрование документа #1</td>
+                    <td style="padding: 15px; font-family: monospace; font-size: 12px;">192.168.1.3</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dbe2ef;">
+                    <td style="padding: 15px;">2024-01-15 10:50:00</td>
+                    <td style="padding: 15px;">
+                        <span style="background: #f5e6ad; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            Рецензент
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">Проверка документа #2</td>
+                    <td style="padding: 15px; font-family: monospace; font-size: 12px;">192.168.1.4</td>
+                </tr>
+                <tr>
+                    <td style="padding: 15px;">2024-01-15 10:55:00</td>
+                    <td style="padding: 15px;">
+                        <span style="background: #a8c6e0; padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px;">
+                            Утверждающий
+                        </span>
+                    </td>
+                    <td style="padding: 15px;">Утверждение приказа #3</td>
+                    <td style="padding: 15px; font-family: monospace; font-size: 12px;">192.168.1.5</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 30px; background: #f9f7f7; padding: 20px; border-radius: 10px;">
+        <h3 style="color: #3f72af; margin-bottom: 15px;">Информация о журнале аудита</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4 style="color: #112d4e; margin-bottom: 10px;">Что записывается</h4>
+                <ul style="color: #3f72af; padding-left: 20px;">
+                    <li>IP-адрес пользователя</li>
+                    <li>Временная метка операции</li>
+                    <li>Тип действия (вход, создание, подпись и т.д.)</li>
+                    <li>ID документа (если применимо)</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #112d4e; margin-bottom: 10px;">Цели аудита</h4>
+                <ul style="color: #3f72af; padding-left: 20px;">
+                    <li>Контроль действий пользователей</li>
+                    <li>Расследование инцидентов</li>
+                    <li>Обеспечение прозрачности</li>
+                    <li>Соответствие требованиям безопасности</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

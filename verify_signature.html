@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Проверка подписи{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="text-align: center; margin-bottom: 30px;">Проверка цифровой подписи</h2>
+        
+        <form method="POST" action="#" style="margin-bottom: 30px;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #3f72af;">Выберите документ</label>
+                <select style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;">
+                    <option value="">Выберите документ для проверки</option>
+                    {% if current_user.role == 'admin' %}
+                        <option value="all">Все документы</option>
+                    {% endif %}
+                    <option value="signed">Только подписанные документы</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; color: #3f72af;">Или загрузите файл подписи</label>
+                <input type="file" 
+                       style="width: 100%; padding: 12px; border: 2px solid #dbe2ef; border-radius: 8px;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Проверить подпись
+            </button>
+        </form>
+        
+        <div style="background: #f9f7f7; padding: 20px; border-radius: 10px;">
+            <h4 style="color: #112d4e; margin-bottom: 15px;">Как работает проверка подписи</h4>
+            <ol style="color: #3f72af; padding-left: 20px;">
+                <li>Система вычисляет хэш документа с помощью Стрибог-256</li>
+                <li>Используя публичный ключ подписанта, проверяется соответствие подписи</li>
+                <li>Если подпись верна, система подтверждает:
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>Целостность документа (не был изменен)</li>
+                        <li>Аутентичность подписанта</li>
+                        <li>Время подписания (неотвратимость)</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #a8d5ba; border-radius: 8px; color: #112d4e;">
+                <strong>Алгоритм:</strong> ГОСТ 34.10-2018<br>
+                <strong>Хэш-функция:</strong> Стрибог-256 (ГОСТ 34.11-2018)
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="{{ url_for('security_dashboard') }}" class="btn btn-secondary">
+                Назад к панели безопасности
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+<h2>Журнал аудита</h2>
+<ul>
+{% for a in audit %}
+<li>{{a.time}} | {{a.user}} | {{a.ip}} | {{a.action}}</li>
+{% endfor %}
+</ul>
